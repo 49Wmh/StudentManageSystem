@@ -15,6 +15,7 @@ typedef struct {
     float scores[MAX_SUBJECTS];
     float total;
     int subject_count;
+    float average;
 } Student;
 
 // 全局变量
@@ -209,8 +210,7 @@ void add_student() {
     student_count++;
 
     printf("\n学生信息添加成功！\n");
-    printf("学号: %s, 姓名: %s, 总分: %.2f, 平均分: %.2f\n",
-        new_student.id, new_student.name, new_student.total, new_student.average);
+    printf("学号: %s, 姓名: %s, 总分: %.2f, 平均分: %.2f\n",new_student.id, new_student.name, new_student.total, new_student.average);
 }
 
 // 修改学生信息  王梦涵
@@ -399,7 +399,7 @@ void search_by_id() {
         return;
     }
 
-   
+    Student* stu = &students[index];
 
     printf("\n=== 学生基本信息 ===\n");
     printf("学号: %s\n", stu->id);
@@ -482,8 +482,7 @@ void load_from_file() {
 void analyze_student(){
     char id[20];
     printf("\n请输入要分析的学生学号: ");
-
-    gets(id, sizeof(id), stdin);
+    gets(id);
 
     int index =find_student_index(id);
     if (index ==-1) {
@@ -492,7 +491,7 @@ void analyze_student(){
     }
     printf("\n 学生成绩分析报告 \n");
     printf("学生: %s - %s\n\n",students[index].id,students[index].name);
-}
+    
     //计算各科目班级平均分
     float class_average_scores[students[index].subject_count];
     int subject_student_count[students[index].subject_count];
