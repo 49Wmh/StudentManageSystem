@@ -15,6 +15,7 @@ typedef struct {
     float scores[MAX_SUBJECTS];
     float total;
     int subject_count;
+    float average;
 } Student;
 
 // 全局变量
