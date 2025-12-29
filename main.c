@@ -25,6 +25,7 @@ int subject_total = 5;  // 默认5门科目
 
 // 函数声明
 void display_menu();
+void initialize_system();
 
 //新增学生信息 王梦涵 
 void add_student();
@@ -49,7 +50,7 @@ void analyze_student();
 //以下几个为全局函数,封怡晨
 int find_student_index(const char* id);
 void calculate_student_stats(Student* stu);
-int confirm_action();
+int confirm_action(const char* message);
 void clear_input_buffer();
 
 // 主函数
@@ -80,8 +81,7 @@ int main() {
         case 8: analyze_student(); break;
         case 9: printf("正在保存数据...\n"); save_to_file(); break;
         case 0:
-            printf("确定要退出吗？(y/n): ");
-            if (confirm_action()) {
+            if (confirm_action("确定要退出吗？(y/n): ")) {
                 printf("正在保存数据并退出...\n");
                 save_to_file();
                 printf("感谢使用学生成绩管理系统！\n");
@@ -99,7 +99,7 @@ int main() {
 
 // 显示菜单
 void display_menu() {
-    system("clear || cls");  // 清屏,将以前的代码痕迹消除
+    system("clear || cls");  // 清屏，兼容Linux和Windows
     printf("\n========== 学生成绩管理系统 ==========\n");
     printf("1. 新增学生信息\n");
     printf("2. 修改学生信息\n");
@@ -117,20 +117,19 @@ void display_menu() {
 // 清除输入缓冲区
 void clear_input_buffer() {
     int c;
-    while ((c = getchar()) != '\n' && c != EOF){
-        //消耗掉不符合条件的
-    }
+    while ((c = getchar()) != '\n' && c != EOF);
 }
 
 // 确认操作
-int confirm_action() {
+int confirm_action(const char* message) {
     char choice;
+    printf("%s", message);
     scanf(" %c", &choice);
     clear_input_buffer();
     return (tolower(choice) == 'y');
 }
 
-// 计算学生统计总分和平均分
+// 计算学生统计信息
 void calculate_student_stats(Student* stu) {
     stu->total = 0;
     for (int i = 0; i < stu->subject_count; i++) {
@@ -142,7 +141,6 @@ void calculate_student_stats(Student* stu) {
 // 查找学生索引
 int find_student_index(const char* id) {
     for (int i = 0; i < student_count; i++) {
-        //strcmp不仅仅可以比较字典序,还可以比较数字字符串
         if (strcmp(students[i].id, id) == 0) {
             return i;
         }
@@ -164,12 +162,8 @@ void add_student() {
     // 输入学号
     while (1) {
         printf("请输入学号: ");
-        //stdin是常见用法,从键盘输入
-        //可以读取空格,也不用担心两个scanf和scanf之间因为缓冲器的\n而读取错误
-        fgets(new_student.id, sizeof(new_student.id), stdin);
-        //strcspn(tr1,str2)从str1开头开始查找,有多少个字符不属于str2,返回此数
-        //主要功能是将\n换成'\0'
-        new_student.id[strcspn(new_student.id, "\n")] = '\0';  // 去除换行符
+        scanf("%s",new_student.id);
+        new_student.id[strcspn(new_student.id, "\n")] = 0;  // 去除换行符
 
         if (find_student_index(new_student.id) != -1) {
             printf("该学号已存在！请重新输入。\n");
@@ -181,8 +175,8 @@ void add_student() {
 
     // 输入姓名
     printf("请输入姓名: ");
-    fgets(new_student.name, sizeof(new_student.name), stdin);
-    new_student.name[strcspn(new_student.name, "\n")] = '\0';
+    scanf("%s",new_student.name);
+    new_student.name[strcspn(new_student.name, "\n")] = 0;
 
     // 输入科目数
     printf("请输入考试科目数量 (最多%d门): ", MAX_SUBJECTS);
@@ -206,8 +200,7 @@ void add_student() {
     calculate_student_stats(&new_student);
 
     // 添加到数组
-    students[student_count] = new_student;
-    student_count++;
+    students[student_count++] = new_student;
 
     printf("\n学生信息添加成功！\n");
     printf("学号: %s, 姓名: %s, 总分: %.2f, 平均分: %.2f\n",
@@ -218,8 +211,8 @@ void add_student() {
 void modify_student() {
     char id[20];
     printf("\n请输入要修改的学生学号: ");
-    fgets(id, sizeof(id), stdin);
-    id[strcspn(id, "\n")] = '\0';
+    scanf("%s",id);
+    id[strcspn(id, "\n")] = 0;
 
     int index = find_student_index(id);
     if (index == -1) {
@@ -233,8 +226,8 @@ void modify_student() {
         printf("科目%d: %.1f ", i + 1, students[index].scores[i]);
     }
     printf("\n");
-    printf("确定要修改该学生信息吗？(y/n): ");
-    if (!confirm_action()) {
+
+    if (!confirm_action("确定要修改该学生信息吗？(y/n): ")) {
         printf("操作已取消。\n");
         return;
     }
@@ -244,8 +237,8 @@ void modify_student() {
     // 修改姓名
     printf("请输入新姓名 (原: %s): ", students[index].name);
     char new_name[50];
-    fgets(new_name, sizeof(new_name), stdin);
-    new_name[strcspn(new_name, "\n")] = '\0';
+    scanf("%s",new_name);
+    new_name[strcspn(new_name, "\n")] = 0;
     if (strlen(new_name) > 0) {
         strcpy(students[index].name, new_name);
     }
@@ -273,8 +266,8 @@ void modify_student() {
 void delete_student() {
     char id[20];
     printf("\n请输入要删除的学生学号: ");
-    fgets(id, sizeof(id), stdin);
-    id[strcspn(id, "\n")] = '\0';
+    scanf("%s",id);
+    id[strcspn(id, "\n")] = 0;
 
     int index = find_student_index(id);
     if (index == -1) {
@@ -283,15 +276,14 @@ void delete_student() {
     }
 
     printf("\n找到学生: %s - %s\n", students[index].id, students[index].name);
-        printf("确定要删除该学生吗？此操作不可恢复！(y/n): ");
-    if (!confirm_action()) {
+
+    if (!confirm_action("确定要删除该学生吗？此操作不可恢复！(y/n): ")) {
         printf("操作已取消。\n");
         return;
     }
 
     // 二次确认
-    printf("请再次确认删除操作 (y/n): ");
-    if (!confirm_action()) {
+    if (!confirm_action("请再次确认删除操作 (y/n): ")) {
         printf("操作已取消。\n");
         return;
     }
@@ -317,10 +309,10 @@ void display_all() {
     printf("%-15s %-20s ", "学号", "姓名");
 
     for (int i = 0; i < subject_total; i++) {
-        printf("科目%d  ", i + 1);
+        printf("科目%d ", i + 1);
     }
 
-    printf("%-8s %-10s\n", "  总分", "平均分");
+    printf("%-10s %-10s\n", "总分", "平均分");
     printf("----------------------------------------------------------------\n");
 
     for (int i = 0; i < student_count; i++) {
@@ -392,7 +384,7 @@ void search_by_id() {
     char id[20];
     printf("\n请输入要查询的学生学号: ");
     fgets(id, sizeof(id), stdin);
-    id[strcspn(id, "\n")] = '\0';
+    id[strcspn(id, "\n")] = 0;
 
     int index = find_student_index(id);
     if (index == -1) {
@@ -453,9 +445,9 @@ void save_to_file() {
 
 // 从文件加载数据  朱振奥
 void load_from_file() {
-    FILE* file = fopen(FILENAME, "r");  // "r" 只读文本模式
+    FILE* file = fopen(FILENAME, "r");  // "r" 文本模式
     if (file == NULL) {
-        printf("未找到数据文件，将使用空文件。\n");
+        printf("未找到数据文件，将创建新文件。\n");
         return;
     }
 
@@ -480,100 +472,74 @@ void load_from_file() {
 
 
 // 分析学生成绩  喻梦琪
-void analyze_student(){
+void analyze_student() {
     char id[20];
     printf("\n请输入要分析的学生学号: ");
-    gets(id);
+    gets(id, sizeof(id), stdin);
+    id[strcspn(id, "\n")] = 0;
 
-    int index =find_student_index(id);
-    if (index ==-1) {
+    int index = find_student_index(id);
+    if (index == -1) {
         printf("未找到学号为 %s 的学生！\n", id);
         return;
     }
-    printf("\n 学生成绩分析报告 \n");
-    printf("学生: %s - %s\n\n",students[index].id,students[index].name);
-    
-    //计算各科目班级平均分
-    float class_average_scores[students[index].subject_count];
-    int subject_student_count[students[index].subject_count];
-    
-    for (int subject = 0; subject < students[index].subject_count; subject++) {
-        class_average_scores[subject] = 0;
-        subject_student_count[subject] = 0;
-        
-        for (int i = 0; i < student_count; i++) {
-            if (students[i].subject_count > subject) {
-                class_average_scores[subject] += students[i].scores[subject];
-                subject_student_count[subject]++;
-            }
-        }
-        
-            class_average_scores[subject] /= subject_student_count[subject];
-       
-    }
 
+    Student* stu = &students[index];
+
+    printf("\n=== 学生成绩分析报告 ===\n");
+    printf("学生: %s - %s\n\n", stu->id, stu->name);
 
     // 单科排名分析
     printf("1. 单科成绩排名分析:\n");
-    for (int subject=0; subject<students[index].subject_count; subject++) {
-    int rank =1;
-    int real_count=0;
-    
-    for(int i=0;i<student_count;i++) {
-        if(students[i].subject_count>subject) {
-            real_count++;
-            if (students[i].scores[subject]>students[index].scores[subject]) {
+    for (int subject = 0; subject < stu->subject_count; subject++) {
+        int rank = 1;
+        for (int i = 0; i < student_count; i++) {
+            if (students[i].subject_count > subject &&
+                students[i].scores[subject] > stu->scores[subject]) {
                 rank++;
             }
         }
+        printf("   科目%d: %.1f分，排名 %d/%d\n",
+            subject + 1, stu->scores[subject], rank, student_count);
     }
-    printf("科目%d: %.1f分，排名 %d/%d\n",subject + 1, students[index].scores[subject],rank,real_count);
-}
- 
+
     // 优势学科和劣势学科分析
     printf("\n2. 优势与劣势学科分析:\n");
+
+    // 找出最高分和最低分科目
     int best_subject = 0, worst_subject = 0;
-    float best_score = students[index].scores[0];
-    float worst_score = students[index].scores[0];
-    
-    //遍历查找学生的所有科目的成绩，并找出最高分和最低分科目
-    for(int i=1;i<students[index].subject_count;i++) {
-        if(students[index].scores[i]>best_score) {
-            best_score=students[index].scores[i];
-            best_subject=i;
-        }
-        if(students[index].scores[i]<worst_score) {
-            worst_score=students[index].scores[i];
-            worst_subject=i;
-        }
-    }
+    float best_score = stu->scores[0];
+    float worst_score = stu->scores[0];
 
-    printf("优势学科: 科目%d (%.1f分)\n", best_subject + 1, best_score);
-    printf("劣势学科: 科目%d (%.1f分)\n", worst_subject + 1, worst_score);
-
-    // 与班级平均分比较
-    printf("\n3. 与班级平均分比较:\n");
-    for(int i = 0; i < students[index].subject_count; i++) {
-        if(subject_student_count[i]>0) {  
-            float diff = students[index].scores[i]-class_average_scores[i]; 
-            printf("科目%d:\n", i + 1);
-            printf("学生成绩:%.1f分\n",students[index].scores[i]);
-            printf("班级平均:%.1f分\n",class_average_scores[i]);
-            if (diff>0) {
-                printf("高于班级平均分%.1f分\n", diff);
-            }else if(diff<0) {
-                printf("低于班级平均分%.1f分\n", -diff);
-            }
-            else{
-                printf("等于班级平均分\n");
-            }
-        }else{
-            printf("科目%d:无班级平均分数据\n", i + 1);
+    for (int i = 1; i < stu->subject_count; i++) {
+        if (stu->scores[i] > best_score) {
+            best_score = stu->scores[i];
+            best_subject = i;
+        }
+        if (stu->scores[i] < worst_score) {
+            worst_score = stu->scores[i];
+            worst_subject = i;
         }
     }
 
+    printf("   优势学科: 科目%d (%.1f分)\n", best_subject + 1, best_score);
+    printf("   劣势学科: 科目%d (%.1f分)\n", worst_subject + 1, worst_score);
 
-
+    // 与平均分比较
+    printf("\n3. 与平均分比较:\n");
+    for (int i = 0; i < stu->subject_count; i++) {
+        float diff = stu->scores[i] - stu->average;
+        if (diff > 0) {
+            printf("   科目%d: 高于平均分 %.1f分\n", i + 1, diff);
+        }
+        else if (diff < 0) {
+            printf("   科目%d: 低于平均分 %.1f分\n", i + 1, -diff);
+        }
+        else {
+            printf("   科目%d: 等于平均分\n", i + 1);
+        }
+    }
+}
 
 
 
