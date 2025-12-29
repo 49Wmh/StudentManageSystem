@@ -15,6 +15,7 @@ typedef struct {
     float scores[MAX_SUBJECTS];
     float total;
     int subject_count;
+    float average;
 } Student;
 
 // 全局变量
@@ -483,7 +484,7 @@ void analyze_student(){
     char id[20];
     printf("\n请输入要分析的学生学号: ");
 
-    fgets(id, sizeof(id), stdin);
+    gets(id, sizeof(id), stdin);
 
     int index =find_student_index(id);
     if (index ==-1) {
