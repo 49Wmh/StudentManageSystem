@@ -217,7 +217,7 @@ void add_student() {
 void modify_student() {
     char id[20];
     printf("\n请输入要修改的学生学号: ");
-    fgets(id, sizeof(id), stdin);
+    gets(id, sizeof(id), stdin);
     id[strcspn(id, "\n")] = '\0';
 
     int index = find_student_index(id);
@@ -571,6 +571,7 @@ void analyze_student(){
             printf("科目%d:无班级平均分数据\n", i + 1);
         }
     }
+
 
 
 
